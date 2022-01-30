@@ -22,4 +22,6 @@ urlpatterns = [
           name="password_reset_complete"),
 
       path('apiView/',views.apiView,name="apiView"),
+
+      path('addData/',views.addData,name="addData"),
 ]

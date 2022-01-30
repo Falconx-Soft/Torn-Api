@@ -22,6 +22,7 @@ class apiInfo(models.Model):
 
 class record(models.Model):
     UserId = models.CharField(max_length=100 ,null=True)
+    Faction = models.CharField(max_length=100 ,null=True)
     TotalStats = models.IntegerField(null=True)
     Str = models.CharField(max_length=100,null=True)
     Def = models.CharField(max_length=100,null=True)

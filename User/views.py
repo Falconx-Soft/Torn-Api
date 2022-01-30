@@ -10,6 +10,7 @@ import uuid
 from django.conf import settings
 from django.core.mail import send_mail
 import requests
+import pandas as pd
 
 # Create your views here.
 @login_required(login_url='login')
@@ -27,37 +28,59 @@ def home(request):
 		pass
 	return render(request,'User/home.html')
 
+def addData(request):
+	chk = pd.read_excel("data.xlsx")
+	data = chk.values.tolist()
+	for d in data:
+		temp = d[0].split(" ")
+		if len(temp) != 1:
+			db_user_id = temp[1].strip("[]")
+		else:
+			db_user_id = temp[0].strip("[]")
+		db_faction = d[2]
+		db_totalStats = d[8]
+		db_str = d[4]
+		db_def = d[5]
+		db_spd = d[6]
+		db_dex = d[5]
+		record_obj = record(UserId=db_user_id,Faction=db_faction,TotalStats=db_totalStats,Str=db_str,Def=db_def,Spd=db_spd,Dex=db_dex)
+		record_obj.save()
+
 def apiView(request):
 	user_info = apiInfo.objects.get(user=request.user)
 	key = user_info.apiKey
 	record_obj = record.objects.all()
 	data_list = []
 	faction_list = []
+	x = 0
 	for r in record_obj:
-		data = requests.get('https://api.torn.com/user/'+r.UserId+'?selections=&key='+key+'')
-		json_data = data.json()
-		name = json_data["name"]
-		status = json_data["status"]["description"]
-		level = json_data["level"]
-		age = json_data["age"]
-		lastAction = json_data["last_action"]["relative"]
-		faction = json_data["faction"]["faction_name"]
-		if faction not in faction_list:
-			faction_list.append(faction)
-		data_info = {
-			'name':name,
-			'status':status,
-			'level':level,
-			'age':age,
-			'lastAction':lastAction,
-			'faction':faction,
-			'total_stats':r.TotalStats,
-			'str':r.Str,
-			'def':r.Def,
-			'spd':r.Spd,
-			'dex':r.Dex
-		}
-		data_list.append(data_info)
+		x = x+1
+		try:
+			print(x,r.UserId)
+			data = requests.get('https://api.torn.com/user/'+r.UserId+'?selections=&key='+key+'')
+			json_data = data.json()
+			name = json_data["name"]
+			status = json_data["status"]["description"]
+			level = json_data["level"]
+			age = json_data["age"]
+			lastAction = json_data["last_action"]["relative"]
+			data_info = {
+				'name':name,
+				'status':status,
+				'level':level,
+				'age':age,
+				'lastAction':lastAction,
+				'faction':r.Faction,
+				'total_stats':r.TotalStats,
+				'str':r.Str,
+				'def':r.Def,
+				'spd':r.Spd,
+				'dex':r.Dex,
+				'user_id':r.UserId,
+			}
+			data_list.append(data_info)
+		except:
+			print("Error at...",x,r.UserId)
 	context = {
 		'data_list':data_list,
 		'faction_list':faction_list
