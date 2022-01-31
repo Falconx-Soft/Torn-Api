@@ -26,7 +26,7 @@
     <div class="pcoded-main-container">
         <div class="pcoded-content">
             <h1>Hello</h1>
-            <div class="filterInput">
+            <div class="filterInput" style="margin-bottom: 16px;">
                 <input type="text" placeholder="min ..." id="min" class="form-control col-12 col-md-5 mt-2 mt-md-0 mr-5">
 
                 <input type="text" placeholder="max ..." id="max" class="form-control col-12 col-md-5 mt-2 mt-md-0 mr-5">
@@ -92,6 +92,34 @@
                         </tr>
                     {% endfor %}
               </table>
+
+            {% if record_obj.has_other_pages %}
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        {% if record_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page={{record_obj.previous_page_number}}">Previous</a></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link">Previous</a></li>
+                        {% endif %}
+
+                        {% for page in custom_range %}
+
+                            {% if page == record_obj.number %}
+                                <li class="page-item"><a class="page-link" href="?page={{page}}" style="color:black;">{{page}}</a></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{page}}">{{page}}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if record_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{record_obj.next_page_number}}">Next</a></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link">Next</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+
         </div>
     </div>
     <!-- [ Main Content ] end -->

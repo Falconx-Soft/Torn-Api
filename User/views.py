@@ -1,4 +1,5 @@
 from asyncio.proactor_events import constants
+from turtle import right
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -11,6 +12,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 import requests
 import pandas as pd
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 # Create your views here.
 @login_required(login_url='login')
@@ -50,8 +52,36 @@ def apiView(request):
 	user_info = apiInfo.objects.get(user=request.user)
 	key = user_info.apiKey
 	record_obj = record.objects.all()
+
+	page = request.GET.get('page')
+	results = 5
+	paginator = Paginator(record_obj,results)
+
+	try:
+		record_obj = paginator.page(page)
+	except PageNotAnInteger:
+		page = 1
+		record_obj = paginator.page(page)
+	except EmptyPage:
+		page = paginator.num_pages
+		record_obj = paginator.page(page)
+
+	leftIndex = (int(page) - 1)
+
+	if leftIndex < 1:
+		leftIndex = 1
+
+	rightIndex = (int(page) + 5)
+
+	if rightIndex > paginator.num_pages:
+		rightIndex = paginator.num_pages + 1
+
+	custom_range = range(leftIndex, rightIndex)
+
 	data_list = []
 	faction_list = []
+
+
 	x = 0
 	for r in record_obj:
 		x = x+1
@@ -79,11 +109,16 @@ def apiView(request):
 				'user_id':r.UserId,
 			}
 			data_list.append(data_info)
+			if r.Faction not in faction_list:
+				faction_list.append(r.Faction)
 		except:
 			print("Error at...",x,r.UserId)
 	context = {
 		'data_list':data_list,
-		'faction_list':faction_list
+		'faction_list':faction_list,
+		'paginator':paginator,
+		'record_obj':record_obj,
+		'custom_range':custom_range,
 	}
 	return render(request,'User/apiView.html',context)
 

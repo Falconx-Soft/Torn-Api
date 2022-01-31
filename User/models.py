@@ -32,5 +32,7 @@ class record(models.Model):
     def __str__(self):
         return self.UserId
 
+    class Meta:
+        ordering = ['id']
 
 

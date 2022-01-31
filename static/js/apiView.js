@@ -10,6 +10,7 @@ $(document).ready(function () {
 var table = $('#dtBasicExample').DataTable({ "paging": true , 
   "searching":true,
    responsive: true,
+   "paging": false,
 });
 
 console.log(table)
@@ -41,7 +42,7 @@ $.fn.dataTable.ext.search.push(
     function( settings, data, dataIndex ) {
         var min = parseInt( $('#min').val(), 10 );
         var max = parseInt( $('#max').val(), 10 );
-        var stats = parseFloat( data[6] ) || 0; // use data for the stats column
+        var stats = parseInt( data[6] ) || 0; // use data for the stats column
  
         if ( ( isNaN( min ) && isNaN( max ) ) ||
              ( isNaN( min ) && stats <= max ) ||
@@ -53,15 +54,7 @@ $.fn.dataTable.ext.search.push(
         return false;
     }
 );
- 
-// $(document).ready(function() {
-//     var table = $('#example').DataTable();
-     
-//     // Event listener to the two range filtering inputs to redraw on input
-//     $('#min, #max').keyup( function() {
-//         table.draw();
-//     } );
-// } );
-
 
 document.getElementById("dtBasicExample_filter").style.display="none";
+
+document.getElementById("dtBasicExample_info").style.display="none";
