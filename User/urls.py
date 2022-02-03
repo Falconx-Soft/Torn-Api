@@ -24,4 +24,6 @@ urlpatterns = [
       path('apiView/',views.apiView,name="apiView"),
 
       path('addData/',views.addData,name="addData"),
+
+      path('setValues/',views.setValues,name="setValues"),
 ]

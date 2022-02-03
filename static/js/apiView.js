@@ -58,3 +58,25 @@ $.fn.dataTable.ext.search.push(
 document.getElementById("dtBasicExample_filter").style.display="none";
 
 document.getElementById("dtBasicExample_info").style.display="none";
+
+const showResults = document.querySelectorAll("#showResults");
+
+const num_of_results = document.getElementById("num_of_results");
+
+$('#num_of_results').on( 'change',function () {
+	console.log(this.value)
+	setValue(this.value);
+} );
+
+function setValue(r) {
+    mydata = {result:r}
+    $.ajax({
+      url: "/setValues/",
+      method: "POST",
+      data: mydata,
+      success: function (data) {
+        console.log("Done");
+        document.getElementById("reload").click();
+      },
+    });
+  }

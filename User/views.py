@@ -1,5 +1,6 @@
 from asyncio.proactor_events import constants
 from turtle import right
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -13,6 +14,8 @@ from django.core.mail import send_mail
 import requests
 import pandas as pd
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.sites.shortcuts import get_current_site
 
 # Create your views here.
 @login_required(login_url='login')
@@ -54,7 +57,13 @@ def apiView(request):
 	record_obj = record.objects.all()
 
 	page = request.GET.get('page')
-	results = 5
+	print("************")
+	print(request.GET.get('results'))
+	if 'result' not in request.session:
+		results = 5
+		
+	else:
+		results = request.session['result']
 	paginator = Paginator(record_obj,results)
 
 	try:
@@ -121,6 +130,11 @@ def apiView(request):
 		'custom_range':custom_range,
 	}
 	return render(request,'User/apiView.html',context)
+@csrf_exempt
+def setValues(request):
+	print("Hello")
+	request.session['result'] = request.POST['result']
+	return JsonResponse({'status':'done'})
 
 def loginUser(request):
 
@@ -161,7 +175,7 @@ def register(request):
 			accountsCheck_obj = accountsCheck.objects.create(user=user, auth_token = auth_token)
 			accountsCheck_obj.save()
 
-			verificationMain(user.email,auth_token)
+			verificationMain(request,user.email,auth_token)
 
 			return redirect('login')
 		else:
@@ -176,9 +190,11 @@ def verify(request, auth_token):
 		accountsCheck_obj.save()
 		return redirect('login')
 
-def verificationMain(email, auth_token):
+def verificationMain(request,email, auth_token):
 	subject = 'Please verify your account'
-	message = f'Hi please click on the link to verify your account http://localhost:8000/verify/{auth_token}'
+	url = get_current_site(request)
+	print(url)
+	message = "Hi please click on the link to verify your account "+str(url)+"/verify/"+auth_token
 	email_from = settings.EMAIL_HOST_USER
 	recipient_list = [email]
 	send_mail(subject,message,email_from, recipient_list)
